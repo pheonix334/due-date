@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-P41HN02DDV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-P41HN02DDV');
+</script>
+<title>Pregnancy Due Date Calculator</title>
+<meta name="description" content="Free pregnancy due date calculator. Estimate your due date from your last period or conception date, and track your gestational age week by week.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --paper-raised:#FFFFFF; --ink:#1A1A16; --ink-soft:#585448;
+    --muted:#8A8577; --protein:#B23A2F; --carb:#C08A17; --fat:#5C6B2E; --fiber:#3A6B6B;
+    --danger:#B23A2F; --hair:#DEDACD; --preg:#A85C7A; --preg-soft:#F5EBF0;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  #root{ max-width:660px; margin:0 auto; padding:28px 18px 80px; }
+
+  .site-header{ position:sticky; top:0; z-index:100; background:var(--paper); border-bottom:1.5px solid var(--ink); margin-bottom:22px; padding:14px 0; }
+  .site-header-inner{ display:flex; align-items:center; justify-content:space-between; position:relative; }
+  .site-logo{ display:flex; align-items:center; gap:7px; font-family:'Archivo Black',sans-serif; font-size:14px; text-transform:uppercase; letter-spacing:-0.01em; color:var(--ink); text-decoration:none; white-space:nowrap; }
+  .site-logo .logo-dot{ width:8px; height:8px; border-radius:50%; background:var(--protein); flex-shrink:0; }
+
+  .current-page{ font-family:'Space Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); display:none; }
+
+  .tools-dropdown{ position:relative; }
+  .tools-btn{
+    display:flex; align-items:center; gap:7px; font-family:'Space Mono',monospace; font-size:11px;
+    text-transform:uppercase; letter-spacing:0.03em; background:var(--ink); color:var(--paper);
+    border:1.5px solid var(--ink); padding:9px 14px; border-radius:3px; cursor:pointer;
+    transition:background-color 0.15s ease;
+  }
+  .tools-btn:hover{ background:#33332E; }
+  .tools-btn .chevron{ transition:transform 0.15s ease; flex-shrink:0; }
+  .tools-btn[aria-expanded="true"] .chevron{ transform:rotate(180deg); }
+
+  .tools-menu{
+    display:none; position:absolute; top:calc(100% + 10px); right:0; width:320px; max-width:calc(100vw - 36px);
+    background:var(--paper-raised); border:1.5px solid var(--ink); box-shadow:0 10px 26px rgba(26,26,22,0.16);
+    padding:8px; z-index:200; max-height:70vh; overflow-y:auto;
+  }
+  .tools-menu.open{ display:block; }
+  .tools-menu-label{ font-family:'Space Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); padding:8px 10px 4px; }
+  .tools-menu a{ display:block; padding:10px; border-radius:3px; text-decoration:none; color:var(--ink); border-bottom:1px solid var(--hair); }
+  .tools-menu a:last-child{ border-bottom:none; }
+  .tools-menu a:hover{ background:var(--paper); }
+  .tools-menu .tm-name{ font-weight:700; font-size:13px; margin-bottom:2px; }
+  .tools-menu .tm-desc{ font-size:11px; color:var(--ink-soft); line-height:1.45; }
+
+  @media (min-width:640px){
+    .current-page{ display:block; }
+  }
+
+  .brand{ margin-bottom:22px; }
+  .brand h1{ font-family:'Archivo Black',sans-serif; font-size:24px; letter-spacing:-0.02em; margin:0; text-transform:uppercase; }
+  .brand .sub{ font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:0.04em; }
+
+  .card{ background:var(--paper-raised); border:1.5px solid var(--ink); padding:20px; margin-bottom:20px; }
+  .card h3{ font-family:'Space Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 14px; color:var(--ink-soft); }
+
+  .method-toggle{ display:flex; border:1.5px solid var(--ink); border-radius:2px; overflow:hidden; margin-bottom:16px; }
+  .method-toggle button{ flex:1; font-family:'Space Mono',monospace; font-size:11px; text-transform:uppercase; padding:9px 6px; border:none; background:var(--paper-raised); color:var(--ink); cursor:pointer; border-right:1px solid var(--ink); }
+  .method-toggle button:last-child{ border-right:none; }
+  .method-toggle button.active{ background:var(--ink); color:var(--paper); }
+
+  .field label{ display:block; font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.03em; }
+  .field input[type=date]{ width:100%; padding:10px; border:1.5px solid var(--hair); border-radius:2px; font-family:'Inter',sans-serif; font-size:15px; background:var(--paper); color:var(--ink); }
+  .field input:focus{ outline:2px solid var(--preg); outline-offset:1px; border-color:var(--preg); }
+  .field-note{ font-family:'Space Mono',monospace; font-size:10.5px; color:var(--muted); margin-top:6px; }
+
+  .calc-btn{ background:var(--ink); color:var(--paper); border:none; padding:12px 20px; font-family:'Space Mono',monospace; font-size:12.5px; text-transform:uppercase; letter-spacing:0.04em; cursor:pointer; border-radius:2px; width:100%; margin-top:16px; }
+  .calc-btn:hover{ background:var(--preg); }
+
+  .label{ background:var(--paper-raised); border:3px solid var(--ink); padding:18px; display:none; margin-bottom:20px; }
+  .label.show{ display:block; }
+  .label h2{ font-family:'Archivo Black',sans-serif; font-size:22px; margin:0 0 4px; letter-spacing:-0.01em; }
+  .thick{ border:none; border-top:9px solid var(--ink); margin:8px 0 12px; }
+
+  .due-date-value{ font-family:'Space Mono',monospace; font-weight:700; font-size:30px; text-align:center; margin:6px 0 4px; color:var(--preg); }
+  .due-date-sub{ text-align:center; font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:16px; }
+
+  .stat-row{ display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--hair); font-size:13.5px; }
+  .stat-row .sr-label{ font-weight:600; }
+  .stat-row .sr-value{ font-family:'Space Mono',monospace; }
+
+  .progress-track{ height:16px; background:var(--paper); border:1.5px solid var(--ink); border-radius:8px; overflow:hidden; margin:14px 0 6px; }
+  .progress-fill{ height:100%; background:var(--preg); }
+  .progress-caption{ display:flex; justify-content:space-between; font-family:'Space Mono',monospace; font-size:9.5px; color:var(--muted); margin-bottom:14px; }
+
+  .milestone-table{ width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+  .milestone-table th{ font-family:'Space Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); text-align:left; padding:6px 4px; border-bottom:1.5px solid var(--ink); }
+  .milestone-table td{ padding:8px 4px; border-bottom:1px solid var(--hair); }
+  .milestone-table tr:last-child td{ border-bottom:none; }
+  .milestone-table td.date-col{ font-family:'Space Mono',monospace; text-align:right; color:var(--ink-soft); }
+  .milestone-table tr.passed td{ color:var(--muted); text-decoration:line-through; }
+
+  .disclaimer{ font-family:'Space Mono',monospace; font-size:10.5px; color:var(--muted); margin-top:18px; line-height:1.6; }
+  .howworks-list{ margin:0 0 14px; padding-left:20px; font-size:13.5px; line-height:1.75; color:var(--ink-soft); }
+  .howworks-list li{ margin-bottom:8px; }
+  .howworks-list li b{ color:var(--ink); }
+  .howworks-list li:last-child{ margin-bottom:0; }
+  .howworks-note{ font-size:12.5px; color:var(--ink-soft); border-top:1px solid var(--hair); padding-top:12px; margin:0; line-height:1.6; }
+  .explore-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .explore-card{ background:var(--paper-raised); border:1.5px solid var(--hair); padding:13px 14px; text-decoration:none; color:var(--ink); display:block; transition:border-color 0.15s ease, background-color 0.15s ease; }
+  .explore-card:hover{ border-color:var(--ink); background:var(--paper); }
+  .explore-card .ec-name{ font-weight:700; font-size:13.5px; margin-bottom:4px; }
+  .explore-card .ec-desc{ font-size:11.5px; color:var(--ink-soft); line-height:1.45; margin-bottom:8px; }
+  .explore-card .ec-arrow{ font-family:'Space Mono',monospace; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.03em; }
+  @media (max-width:520px){ .explore-grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div id="root">
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="https://healthylifescale.com" class="site-logo"><span class="logo-dot"></span>Healthy Life Scale</a>
+      <span class="current-page">Pregnancy Due Date</span>
+      <div class="tools-dropdown">
+        <button class="tools-btn" id="toolsBtn" aria-haspopup="true" aria-expanded="false">
+          Other Tools
+          <svg class="chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 3L5 7L9 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="tools-menu" id="toolsMenu">
+          <div class="tools-menu-label">Other tools</div>
+        <a href="https://healthylifescale.com">
+          <div class="tm-name">Calorie Tracker</div>
+          <div class="tm-desc">Search 240+ foods and track daily calories, protein, carbs, fat, fiber, sugar & sodium.</div>
+        </a>
+        <a href="https://bmi.healthylifescale.com">
+          <div class="tm-name">BMI Calculator</div>
+          <div class="tm-desc">Check your Body Mass Index and healthy weight range.</div>
+        </a>
+        <a href="https://water.healthylifescale.com">
+          <div class="tm-name">Water Intake</div>
+          <div class="tm-desc">Get a daily hydration goal and log glasses as you drink.</div>
+        </a>
+        <a href="https://bmr.healthylifescale.com">
+          <div class="tm-name">BMR / TDEE</div>
+          <div class="tm-desc">Find your daily calorie needs and a personalized macro split.</div>
+        </a>
+        <a href="https://sleep.healthylifescale.com">
+          <div class="tm-name">Sleep Calculator</div>
+          <div class="tm-desc">Find your ideal bedtime or wake-up time by sleep cycle.</div>
+        </a>
+        <a href="https://pregnancyweight.healthylifescale.com">
+          <div class="tm-name">Pregnancy Weight Gain</div>
+          <div class="tm-desc">See your recommended pregnancy weight gain range.</div>
+        </a>
+        <a href="https://period.healthylifescale.com">
+          <div class="tm-name">Period Tracker</div>
+          <div class="tm-desc">Estimate your next period, ovulation day, and fertile window.</div>
+        </a>
+        <a href="https://height.healthylifescale.com">
+          <div class="tm-name">Height Predictor</div>
+          <div class="tm-desc">Estimate a child's adult height from parents' heights.</div>
+        </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+<script>
+(function(){
+  var btn = document.getElementById('toolsBtn');
+  var menu = document.getElementById('toolsMenu');
+  if(!btn || !menu) return;
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var isOpen = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if(!menu.classList.contains('open')) return;
+    if(!menu.contains(e.target) && !btn.contains(e.target)){
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && menu.classList.contains('open')){
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.focus();
+    }
+  });
+})();
+</script>
+
+
+  <div class="brand">
+    <h1>Pregnancy Due Date Calculator</h1>
+    <div class="sub">estimate your due date &amp; track gestational age</div>
+  </div>
+
+  <div class="card">
+    <h3>Calculate based on</h3>
+    <div class="method-toggle">
+      <button id="methodLMP" class="active">Last period (LMP)</button>
+      <button id="methodConception">Conception date</button>
+    </div>
+
+    <div class="field" id="lmpField">
+      <label for="lmpDate">First day of your last menstrual period</label>
+      <input type="date" id="lmpDate">
+      <div class="field-note">Most common method &mdash; assumes an average 28-day cycle.</div>
+    </div>
+    <div class="field" id="conceptionField" style="display:none;">
+      <label for="conceptionDate">Conception date</label>
+      <input type="date" id="conceptionDate">
+      <div class="field-note">If you know roughly when conception occurred (e.g. from ovulation tracking or IVF).</div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate due date</button>
+  </div>
+
+  <div class="label" id="resultLabel">
+    <h2>Your Estimated Due Date</h2>
+    <hr class="thick">
+    <div class="due-date-value" id="dueDateValue"></div>
+    <div class="due-date-sub">40 weeks from your last period &middot; only ~5% of babies arrive on their exact due date</div>
+
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+    <div class="progress-caption"><span>LMP</span><span id="progressLabel"></span><span>Due date</span></div>
+
+    <div class="stat-row"><span class="sr-label">Gestational age today</span><span class="sr-value" id="gestAge">&mdash;</span></div>
+    <div class="stat-row"><span class="sr-label">Current trimester</span><span class="sr-value" id="trimester">&mdash;</span></div>
+    <div class="stat-row"><span class="sr-label">Days until due date</span><span class="sr-value" id="daysUntil">&mdash;</span></div>
+
+    <table class="milestone-table" id="milestoneTable">
+      <thead><tr><th>Milestone</th><th style="text-align:right;">Date</th></tr></thead>
+      <tbody id="milestoneBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>How it works</h3>
+    <ol class="howworks-list">
+      <li><b>Pick your dating method.</b> Most people use the first day of their last period (LMP); if you know your conception date instead, use that toggle.</li>
+      <li><b>Enter the date.</b> That's the only input needed.</li>
+      <li><b>We add 280 days.</b> This is the standard "Naegele's rule" estimate &mdash; 40 weeks from LMP, or 266 days from conception (accounting for the ~2 weeks before ovulation).</li>
+      <li><b>See your progress.</b> Your current gestational age, trimester, and days remaining are calculated from today's date automatically.</li>
+      <li><b>Track milestones.</b> Key dates like end of first trimester, viability, and full term are laid out on a timeline, with passed ones marked off.</li>
+    </ol>
+    <p class="howworks-note">This is a statistical estimate, not a prediction &mdash; only about 5% of babies arrive exactly on their due date. Your OB/midwife's ultrasound-based dating is generally more precise.</p>
+  </div>
+
+  <div class="card">
+    <h3>Explore other tools</h3>
+    <div class="explore-grid">
+      <a href="https://healthylifescale.com" class="explore-card">
+        <div class="ec-name">Calorie Tracker</div>
+        <div class="ec-desc">Search 240+ foods and track daily calories, protein, carbs, fat, fiber, sugar & sodium.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+      <a href="https://bmi.healthylifescale.com" class="explore-card">
+        <div class="ec-name">BMI Calculator</div>
+        <div class="ec-desc">Check your Body Mass Index and healthy weight range.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+      <a href="https://water.healthylifescale.com" class="explore-card">
+        <div class="ec-name">Water Intake</div>
+        <div class="ec-desc">Get a daily hydration goal and log glasses as you drink.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+      <a href="https://bmr.healthylifescale.com" class="explore-card">
+        <div class="ec-name">BMR / TDEE</div>
+        <div class="ec-desc">Find your daily calorie needs and a personalized macro split.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+      <a href="https://sleep.healthylifescale.com" class="explore-card">
+        <div class="ec-name">Sleep Calculator</div>
+        <div class="ec-desc">Find your ideal bedtime or wake-up time by sleep cycle.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+      <a href="https://pregnancyweight.healthylifescale.com" class="explore-card">
+        <div class="ec-name">Pregnancy Weight</div>
+        <div class="ec-desc">See your recommended pregnancy weight gain range.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+      <a href="https://period.healthylifescale.com" class="explore-card">
+        <div class="ec-name">Period Tracker</div>
+        <div class="ec-desc">Estimate your next period, ovulation day, and fertile window.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+      <a href="https://height.healthylifescale.com" class="explore-card">
+        <div class="ec-name">Height Predictor</div>
+        <div class="ec-desc">Estimate a child's adult height from parents' heights.</div>
+        <div class="ec-arrow">Open &rarr;</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    This is a general estimate based on standard 40-week (280-day) gestation from LMP or 266 days from conception &mdash; actual due dates vary and ultrasound dating may differ. This isn't medical advice; your OB/midwife's dating is the most reliable source.
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  let method = 'lmp';
+
+  $('methodLMP').addEventListener('click', ()=>{
+    method = 'lmp';
+    $('methodLMP').classList.add('active'); $('methodConception').classList.remove('active');
+    $('lmpField').style.display='block'; $('conceptionField').style.display='none';
+  });
+  $('methodConception').addEventListener('click', ()=>{
+    method = 'conception';
+    $('methodConception').classList.add('active'); $('methodLMP').classList.remove('active');
+    $('conceptionField').style.display='block'; $('lmpField').style.display='none';
+  });
+
+  function fmtDate(d){
+    return d.toLocaleDateString(undefined, {weekday:'short', year:'numeric', month:'long', day:'numeric'});
+  }
+  function fmtDateShort(d){
+    return d.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+  }
+  function addDays(date, days){
+    const d = new Date(date);
+    d.setDate(d.getDate()+days);
+    return d;
+  }
+
+  $('calcBtn').addEventListener('click', ()=>{
+    let lmpDate;
+    if(method === 'lmp'){
+      const val = $('lmpDate').value;
+      if(!val){ alert('Please enter the first day of your last period.'); return; }
+      lmpDate = new Date(val + 'T00:00:00');
+    } else {
+      const val = $('conceptionDate').value;
+      if(!val){ alert('Please enter your conception date.'); return; }
+      const conception = new Date(val + 'T00:00:00');
+      lmpDate = addDays(conception, -14); // approximate LMP from conception
+    }
+
+    const dueDate = addDays(lmpDate, 280);
+    $('dueDateValue').textContent = fmtDate(dueDate);
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const gestDays = Math.floor((today - lmpDate) / (1000*60*60*24));
+    const daysUntilDue = Math.floor((dueDate - today) / (1000*60*60*24));
+
+    if(gestDays < 0){
+      $('gestAge').textContent = 'Not yet started';
+      $('trimester').textContent = '\u2014';
+      $('progressFill').style.width = '0%';
+      $('progressLabel').textContent = '';
+    } else {
+      const weeks = Math.floor(gestDays/7);
+      const days = gestDays % 7;
+      $('gestAge').textContent = weeks + ' weeks, ' + days + ' days';
+
+      let tri;
+      if(weeks < 14) tri = '1st trimester';
+      else if(weeks < 28) tri = '2nd trimester';
+      else tri = '3rd trimester';
+      $('trimester').textContent = tri;
+
+      const pct = Math.min(100, Math.max(0, (gestDays/280)*100));
+      $('progressFill').style.width = pct+'%';
+      $('progressLabel').textContent = weeks+'w '+days+'d';
+    }
+
+    $('daysUntil').textContent = daysUntilDue >= 0 ? daysUntilDue + ' days' : 'Due date has passed';
+
+    const milestones = [
+      {name:'End of 1st trimester', days:13*7},
+      {name:'Start of 2nd trimester', days:14*7},
+      {name:'Baby is viable (with intensive care)', days:24*7},
+      {name:'Start of 3rd trimester', days:28*7},
+      {name:'Full term begins', days:37*7},
+      {name:'Due date', days:40*7}
+    ];
+    const rows = milestones.map(m=>{
+      const d = addDays(lmpDate, m.days);
+      const passed = gestDays >= m.days;
+      return `<tr class="${passed ? 'passed' : ''}"><td>${m.name}</td><td class="date-col">${fmtDateShort(d)}</td></tr>`;
+    }).join('');
+    $('milestoneBody').innerHTML = rows;
+
+    $('resultLabel').classList.add('show');
+  });
+})();
+</script>
+</body>
+</html>
